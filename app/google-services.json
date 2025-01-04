@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "354009633231",
+    "project_id": "servicescout-9c322",
+    "storage_bucket": "servicescout-9c322.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354009633231:android:ec7e8cb554671f779802ba",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.servicescout"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApNNOTtWD5uocfyxf8te7bnIg7ihlRxQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
