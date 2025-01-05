@@ -30,7 +30,7 @@ class ServiceViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(false)
 
-    fun uploadService() {
+    fun uploadService(onSuccess: () -> Unit) {
         if (serviceName.isBlank() || serviceDescription.isBlank() || servicePrice.isBlank() || serviceCategory.isBlank() || serviceImageUri == null || serviceLocation == null) {
             errorMessage = "All fields are required."
             return
@@ -59,6 +59,7 @@ class ServiceViewModel : ViewModel() {
                     .addOnSuccessListener {
                         isLoading = false
                         errorMessage = null
+                        onSuccess()
                     }
                     .addOnFailureListener { e ->
                         isLoading = false
