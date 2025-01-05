@@ -2,7 +2,9 @@ package uk.ac.tees.mad.servicescout.ui.theme.viewmodels
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import uk.ac.tees.mad.servicescout.App
 
-class AddServiceViewModel : ViewModel() {
+class ServiceViewModel : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private val locationClient = LocationServices.getFusedLocationProviderClient(App.context)
@@ -24,7 +26,7 @@ class AddServiceViewModel : ViewModel() {
     var servicePrice by mutableStateOf("")
     var serviceCategory by mutableStateOf("")
     var serviceImageUri by mutableStateOf<Uri?>(null)
-    var serviceLocation by mutableStateOf<LatLng?>(null)
+    var serviceLocation by mutableStateOf<String?>(null)
     var errorMessage by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(false)
 
@@ -50,10 +52,7 @@ class AddServiceViewModel : ViewModel() {
                     "price" to servicePrice.toDouble(),
                     "category" to serviceCategory,
                     "imageUrl" to downloadUri.toString(),
-                    "location" to mapOf(
-                        "latitude" to serviceLocation!!.latitude,
-                        "longitude" to serviceLocation!!.longitude
-                    ),
+                    "location" to serviceLocation,
                     "timestamp" to System.currentTimeMillis()
                 )
                 firestore.collection("services").add(service)
@@ -72,7 +71,7 @@ class AddServiceViewModel : ViewModel() {
         }
     }
 
-    fun fetchCurrentLocation() {
+    fun fetchCurrentLocation(context: Context) {
         if (ActivityCompat.checkSelfPermission(
                 App.context,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -82,7 +81,7 @@ class AddServiceViewModel : ViewModel() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                App.context as Activity,
+                context as Activity,
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
@@ -93,7 +92,15 @@ class AddServiceViewModel : ViewModel() {
         }
         locationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
-                serviceLocation = LatLng(location.latitude, location.longitude)
+                val geocoder = Geocoder(App.context)
+                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    val address = addresses[0]
+                    serviceLocation = "${address.latitude}, ${address.longitude}"
+                } else {
+                    errorMessage = "Unable to fetch location."
+                    serviceLocation = null
+                }
             } else {
                 errorMessage = "Unable to fetch location."
             }

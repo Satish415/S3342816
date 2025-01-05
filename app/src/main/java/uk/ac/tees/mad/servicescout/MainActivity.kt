@@ -20,9 +20,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ServiceScoutTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(Modifier.padding(innerPadding))
-                }
+
+                    AppNavigation()
+
             }
         }
     }
