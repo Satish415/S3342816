@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,12 +29,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import uk.ac.tees.mad.servicescout.ui.theme.viewmodels.AuthViewModel
 
 @Composable
-fun RegisterScreen(navController: NavHostController) {
+fun RegisterScreen(navController: NavHostController, authViewModel: AuthViewModel) {
+    val user = authViewModel.user
+    val errorMessage = authViewModel.errorMessage
+
     val email = remember { mutableStateOf("") }
     val name = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+
+    LaunchedEffect(user) {
+        if (user != null) {
+            navController.navigate("home_screen") {
+                popUpTo("login_screen") { inclusive = true }
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -91,11 +104,18 @@ fun RegisterScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* register logic */ },
+                onClick = {
+                    authViewModel.registerUser(email.value, password.value, name.value)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
             ) {
                 Text(text = "Register", color = Color.White)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            errorMessage?.let { error ->
+                Text(text = error, color = Color.Red)
+                Spacer(modifier = Modifier.height(16.dp))
             }
             Spacer(modifier = Modifier.height(16.dp))
 
