@@ -18,7 +18,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import uk.ac.tees.mad.servicescout.R
 
 @Composable
@@ -26,8 +29,16 @@ fun SplashScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         delay(2000)
-        navController.navigate("login_screen") {
-            popUpTo("splash_screen") { inclusive = true }
+        withContext(Dispatchers.Main) {
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                navController.navigate("home_screen") {
+                    popUpTo("splash_screen") { inclusive = true }
+                }
+            } else {
+                navController.navigate("login_screen") {
+                    popUpTo("splash_screen") { inclusive = true }
+                }
+            }
         }
     }
 
