@@ -11,15 +11,48 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.servicescout.App
+import uk.ac.tees.mad.servicescout.ui.theme.screens.Service
 
 class ServiceViewModel : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private val locationClient = LocationServices.getFusedLocationProviderClient(App.context)
+
+    private val _services = MutableStateFlow<List<Service>>(emptyList())
+    val services: StateFlow<List<Service>> = _services
+
+    var isLoading by mutableStateOf(false)
+        private set
+
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+    fun fetchServices() {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                val querySnapshot = firestore.collection("services").get().await()
+                _services.value = querySnapshot.documents.mapNotNull { document ->
+                    document.toObject(Service::class.java)?.copy(id = document.id)
+                }
+            } catch (e: Exception) {
+                errorMessage = e.message
+            } finally {
+                isLoading = false
+            }
+        }
+    }
 
     var serviceName by mutableStateOf("")
     var serviceDescription by mutableStateOf("")
@@ -27,8 +60,6 @@ class ServiceViewModel : ViewModel() {
     var serviceCategory by mutableStateOf("")
     var serviceImageUri by mutableStateOf<Uri?>(null)
     var serviceLocation by mutableStateOf<String?>(null)
-    var errorMessage by mutableStateOf<String?>(null)
-    var isLoading by mutableStateOf(false)
 
     fun uploadService(onSuccess: () -> Unit) {
         if (serviceName.isBlank() || serviceDescription.isBlank() || servicePrice.isBlank() || serviceCategory.isBlank() || serviceImageUri == null || serviceLocation == null) {
