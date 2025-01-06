@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -44,7 +45,15 @@ class ServiceViewModel : ViewModel() {
             try {
                 val querySnapshot = firestore.collection("services").get().await()
                 _services.value = querySnapshot.documents.mapNotNull { document ->
-                    document.toObject(Service::class.java)?.copy(id = document.id)
+                    Service(
+                        id = document.id,
+                        name = document.getString("name") ?: "",
+                        description = document.getString("description") ?: "",
+                        price = document.getDouble("price") ?: 0.0,
+                        category = document.getString("category") ?: "",
+                        imageUrl = document.getString("imageUrl") ?: "",
+                        location = document.getString("location") ?: ""
+                    )
                 }
             } catch (e: Exception) {
                 errorMessage = e.message
@@ -124,11 +133,13 @@ class ServiceViewModel : ViewModel() {
         }
         locationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
-                val geocoder = Geocoder(App.context)
+                val geocoder = Geocoder(context)
                 val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
                 if (!addresses.isNullOrEmpty()) {
                     val address = addresses[0]
                     serviceLocation = "${address.latitude}, ${address.longitude}"
+                    Log.d("ADDRESS", serviceLocation.toString())
+
                 } else {
                     errorMessage = "Unable to fetch location."
                     serviceLocation = null

@@ -30,8 +30,12 @@ fun AppNavigation(
         composable("splash_screen") { SplashScreen(navController) }
         composable("login_screen") { LoginScreen(navController, authViewModel) }
         composable("register_screen") { RegisterScreen(navController, authViewModel) }
-        composable("home_screen") { HomeScreen(navController) }
+        composable("home_screen") { HomeScreen(navController, serviceViewModel) }
         composable("add_service_screen") { AddServiceScreen(serviceViewModel, navController) }
+        composable("service_details_screen/{serviceId}") { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString("serviceId")
+//            ServiceDetailsScreen(serviceId, serviceViewModel, navController)
+        }
 
     }
 }
