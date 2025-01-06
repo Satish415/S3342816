@@ -8,9 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import uk.ac.tees.mad.servicescout.repositories.AuthRepository
+import uk.ac.tees.mad.servicescout.repositories.ServiceRepository
 import uk.ac.tees.mad.servicescout.ui.theme.viewmodels.ServiceViewModel
 import uk.ac.tees.mad.servicescout.ui.theme.viewmodels.AuthViewModel
 import uk.ac.tees.mad.servicescout.ui.theme.viewmodels.AuthViewModelFactory
+import uk.ac.tees.mad.servicescout.ui.theme.viewmodels.ServiceViewModelFactory
 
 @Composable
 fun AppNavigation(
@@ -20,7 +22,8 @@ fun AppNavigation(
     val authViewModel: AuthViewModel =
         viewModel(factory = AuthViewModelFactory(AuthRepository()))
 
-    val serviceViewModel: ServiceViewModel = viewModel()
+    val serviceViewModel: ServiceViewModel =
+        viewModel(factory = ServiceViewModelFactory(ServiceRepository()))
 
     NavHost(
         navController = navController,

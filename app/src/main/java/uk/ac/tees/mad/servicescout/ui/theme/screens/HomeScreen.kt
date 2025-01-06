@@ -165,12 +165,12 @@ fun ServiceCard(service: Service, onClick: () -> Unit) {
 }
 
 data class Service(
-    val id: String,
-    val name: String,
-    val description: String,
-    val price: Double,
-    val imageUrl: String,
-    val location: String,
-    val category: String
+    val id: String = "",
+    val name: String = "",
+    val description: String = "",
+    val price: Double = 0.0,
+    val imageUrl: String = "",
+    val location: String = "",
+    val category: String = ""
 )
 

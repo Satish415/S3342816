@@ -14,23 +14,23 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.servicescout.App
+import uk.ac.tees.mad.servicescout.repositories.ServiceRepository
 import uk.ac.tees.mad.servicescout.ui.theme.screens.Service
 
-class ServiceViewModel : ViewModel() {
-    private val firestore = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
+class ServiceViewModel(
+    private val serviceRepository: ServiceRepository
+) : ViewModel() {
     private val locationClient = LocationServices.getFusedLocationProviderClient(App.context)
 
     private val _services = MutableStateFlow<List<Service>>(emptyList())
     val services: StateFlow<List<Service>> = _services
+
+    private val _serviceDetail = MutableStateFlow<Service>(Service())
+    val serviceDetail: StateFlow<Service> = _serviceDetail
 
     var isLoading by mutableStateOf(false)
         private set
@@ -42,24 +42,13 @@ class ServiceViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
-            try {
-                val querySnapshot = firestore.collection("services").get().await()
-                _services.value = querySnapshot.documents.mapNotNull { document ->
-                    Service(
-                        id = document.id,
-                        name = document.getString("name") ?: "",
-                        description = document.getString("description") ?: "",
-                        price = document.getDouble("price") ?: 0.0,
-                        category = document.getString("category") ?: "",
-                        imageUrl = document.getString("imageUrl") ?: "",
-                        location = document.getString("location") ?: ""
-                    )
-                }
-            } catch (e: Exception) {
-                errorMessage = e.message
-            } finally {
-                isLoading = false
+            val result = serviceRepository.fetchServices()
+            result.onSuccess {
+                _services.value = it
+            }.onFailure {
+                errorMessage = it.localizedMessage
             }
+            isLoading = false
         }
     }
 
@@ -78,39 +67,47 @@ class ServiceViewModel : ViewModel() {
 
         isLoading = true
         errorMessage = null
+        viewModelScope.launch {
 
-        val imageRef = storage.reference.child("services/${System.currentTimeMillis()}.jpg")
-        serviceImageUri?.let { uri ->
-            val uploadTask = imageRef.putFile(uri)
-            uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) throw task.exception ?: Exception("Upload failed")
-                imageRef.downloadUrl
-            }.addOnSuccessListener { downloadUri ->
-                val service = mapOf(
-                    "name" to serviceName,
-                    "description" to serviceDescription,
-                    "price" to servicePrice.toDouble(),
-                    "category" to serviceCategory,
-                    "imageUrl" to downloadUri.toString(),
-                    "location" to serviceLocation,
-                    "timestamp" to System.currentTimeMillis()
-                )
-                firestore.collection("services").add(service)
-                    .addOnSuccessListener {
-                        isLoading = false
-                        errorMessage = null
-                        onSuccess()
-                    }
-                    .addOnFailureListener { e ->
-                        isLoading = false
-                        errorMessage = e.localizedMessage
-                    }
-            }.addOnFailureListener { e ->
-                isLoading = false
-                errorMessage = e.localizedMessage
-            }
+
+            val url = serviceRepository.uploadImage(serviceImageUri)
+
+            val service = Service(
+                id = "",
+                name = serviceName,
+                description = serviceDescription,
+                price = servicePrice.toDouble(),
+                category = serviceCategory,
+                imageUrl = url.getOrThrow(),
+                location = serviceLocation ?: ""
+            )
+            serviceRepository.uploadService(service)
+                .onSuccess {
+                    isLoading = false
+                    errorMessage = null
+                    onSuccess()
+                }
+                .onFailure {
+                    isLoading = false
+                    errorMessage = it.localizedMessage
+                }
         }
     }
+
+    fun fetchServiceById(serviceId: String) {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            serviceRepository.getServiceById(serviceId)
+                .onSuccess {
+                    _serviceDetail.value = it
+                }.onFailure {
+                    errorMessage = it.localizedMessage
+                }
+            isLoading = false
+        }
+    }
+
 
     fun fetchCurrentLocation(context: Context) {
         if (ActivityCompat.checkSelfPermission(
