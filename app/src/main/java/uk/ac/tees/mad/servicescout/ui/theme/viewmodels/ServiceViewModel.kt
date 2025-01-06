@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import uk.ac.tees.mad.servicescout.App
 import uk.ac.tees.mad.servicescout.repositories.ServiceRepository
 import uk.ac.tees.mad.servicescout.ui.theme.screens.Service
+import java.util.Locale
 
 class ServiceViewModel(
     private val serviceRepository: ServiceRepository
@@ -100,12 +101,17 @@ class ServiceViewModel(
             errorMessage = null
             serviceRepository.getServiceById(serviceId)
                 .onSuccess {
+
                     _serviceDetail.value = it
                 }.onFailure {
                     errorMessage = it.localizedMessage
                 }
             isLoading = false
         }
+    }
+
+    fun clearService() {
+        _serviceDetail.value = Service()
     }
 
 
@@ -134,7 +140,8 @@ class ServiceViewModel(
                 val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
                 if (!addresses.isNullOrEmpty()) {
                     val address = addresses[0]
-                    serviceLocation = "${address.latitude}, ${address.longitude}"
+                    serviceLocation =
+                        getAddressFromLatLng(context, "${address.latitude}, ${address.longitude}")
                     Log.d("ADDRESS", serviceLocation.toString())
 
                 } else {
@@ -148,4 +155,20 @@ class ServiceViewModel(
             errorMessage = "Location error: ${it.localizedMessage}"
         }
     }
+
+    private fun getAddressFromLatLng(context: Context, latLng: String): String {
+        return try {
+            val parts = latLng.split(",").map { it.trim().toDouble() }
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val addresses = geocoder.getFromLocation(parts[0], parts[1], 1)
+            if (!addresses.isNullOrEmpty()) {
+                addresses[0].getAddressLine(0) ?: "Address not available"
+            } else {
+                "Address not available"
+            }
+        } catch (e: Exception) {
+            "Address not available"
+        }
+    }
+
 }

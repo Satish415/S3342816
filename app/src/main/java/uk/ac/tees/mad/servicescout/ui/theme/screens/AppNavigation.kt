@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.servicescout.ui.theme.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -25,6 +26,10 @@ fun AppNavigation(
     val serviceViewModel: ServiceViewModel =
         viewModel(factory = ServiceViewModelFactory(ServiceRepository()))
 
+    LaunchedEffect(Unit) {
+        serviceViewModel.fetchServices()
+    }
+
     NavHost(
         navController = navController,
         startDestination = "splash_screen",
@@ -36,8 +41,8 @@ fun AppNavigation(
         composable("home_screen") { HomeScreen(navController, serviceViewModel) }
         composable("add_service_screen") { AddServiceScreen(serviceViewModel, navController) }
         composable("service_details_screen/{serviceId}") { backStackEntry ->
-            val serviceId = backStackEntry.arguments?.getString("serviceId")
-//            ServiceDetailsScreen(serviceId, serviceViewModel, navController)
+            val serviceId = backStackEntry.arguments?.getString("serviceId") ?: return@composable
+            ServiceDetailsScreen(serviceId, serviceViewModel, navController)
         }
 
     }

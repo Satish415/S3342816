@@ -51,9 +51,6 @@ fun HomeScreen(navController: NavHostController, viewModel: ServiceViewModel) {
     val isLoading = viewModel.isLoading
     val errorMessage = viewModel.errorMessage
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchServices()
-    }
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF5F5F5)) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
