@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -82,6 +83,12 @@ fun RegisterScreen(navController: NavHostController, authViewModel: AuthViewMode
                 onValueChange = { email.value = it },
                 label = { Text("Email") },
                 shape = RoundedCornerShape(16.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color(0xFF6200EE),
+                    unfocusedTextColor = Color(0xFF6200EE),
+                    focusedIndicatorColor = Color(0xFF6200EE),
+                    disabledIndicatorColor = Color(0xFF603B96)
+                ),
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -90,6 +97,12 @@ fun RegisterScreen(navController: NavHostController, authViewModel: AuthViewMode
                 onValueChange = { name.value = it },
                 label = { Text("Name") },
                 shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color(0xFF6200EE),
+                    unfocusedTextColor = Color(0xFF6200EE),
+                    focusedIndicatorColor = Color(0xFF6200EE),
+                    disabledIndicatorColor = Color(0xFF603B96)
+                ),
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -99,6 +112,12 @@ fun RegisterScreen(navController: NavHostController, authViewModel: AuthViewMode
                 label = { Text("Password") },
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color(0xFF6200EE),
+                    unfocusedTextColor = Color(0xFF6200EE),
+                    focusedIndicatorColor = Color(0xFF6200EE),
+                    disabledIndicatorColor = Color(0xFF603B96)
+                ),
                 visualTransformation = PasswordVisualTransformation(),
             )
             Spacer(modifier = Modifier.height(24.dp))

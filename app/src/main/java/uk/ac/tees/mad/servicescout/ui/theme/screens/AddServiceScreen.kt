@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -82,7 +83,7 @@ fun AddServiceScreen(viewModel: ServiceViewModel, navController: NavHostControll
                     Text(text = "Add Service")
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.popBackStack(); viewModel.clearForm() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
 
@@ -178,6 +179,7 @@ fun AddServiceScreen(viewModel: ServiceViewModel, navController: NavHostControll
 
                 Button(
                     onClick = { viewModel.uploadService { navController.popBackStack() } },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE)),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !viewModel.isLoading
                 ) {

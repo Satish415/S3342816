@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.servicescout.ui.theme.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -51,6 +54,12 @@ fun HomeScreen(navController: NavHostController, viewModel: ServiceViewModel) {
     val isLoading = viewModel.isLoading
     val errorMessage = viewModel.errorMessage
 
+    LaunchedEffect(services) {
+        if (services.value.isEmpty()) {
+            viewModel.fetchServices()
+        }
+    }
+
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF5F5F5)) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
@@ -64,6 +73,10 @@ fun HomeScreen(navController: NavHostController, viewModel: ServiceViewModel) {
                     IconButton(onClick = { navController.navigate("add_service_screen") }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Service")
                     }
+                    IconButton(onClick = { navController.navigate("user_profile_screen") }) {
+                        Icon(Icons.Default.Person, contentDescription = "Profile")
+                    }
+
                 }
             )
             when {
@@ -114,7 +127,8 @@ fun ServiceCard(service: Service, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() }
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        border = BorderStroke(1.dp, Color(0xFF6200EE))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

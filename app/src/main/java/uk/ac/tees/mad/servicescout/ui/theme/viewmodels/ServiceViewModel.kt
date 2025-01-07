@@ -14,6 +14,8 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -38,6 +40,12 @@ class ServiceViewModel(
 
     var errorMessage by mutableStateOf<String?>(null)
         private set
+
+    init {
+        if (Firebase.auth.currentUser != null) {
+            fetchServices()
+        }
+    }
 
     fun fetchServices() {
         viewModelScope.launch {
@@ -86,6 +94,7 @@ class ServiceViewModel(
                 .onSuccess {
                     isLoading = false
                     errorMessage = null
+                    fetchServices()
                     onSuccess()
                 }
                 .onFailure {
@@ -169,6 +178,15 @@ class ServiceViewModel(
         } catch (e: Exception) {
             "Address not available"
         }
+    }
+
+    fun clearForm() {
+        serviceName = ""
+        serviceDescription = ""
+        servicePrice = ""
+        serviceCategory = ""
+        serviceImageUri = null
+        errorMessage = null
     }
 
 }
